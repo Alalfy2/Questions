@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced RNN and GRU Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .question p {
+            font-weight: bold;
+            color: #555;
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .options label {
+            display: block;
+            margin: 5px 0;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f7fa;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            display: none; /* Hidden by default */
+        }
+        .correct {
+            color: green;
+        }
+        .wrong {
+            color: red;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced RNN and GRU Quiz</h1>
+
+    <div class="question">
+        <p>1. What is the primary purpose of the "update gate" in a GRU?</p>
+        <div class="options">
+            <label><input type="radio" name="q1" value="a"> a) To decide which information to discard from the memory</label>
+            <label><input type="radio" name="q1" value="b"> b) To decide which information to update in the memory</label>
+            <label><input type="radio" name="q1" value="c"> c) To control the output of the network</label>
+            <label><input type="radio" name="q1" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>2. In LSTM, what is the role of the "forget gate"?</p>
+        <div class="options">
+            <label><input type="radio" name="q2" value="a"> a) To decide which information to keep or discard from the cell state</label>
+            <label><input type="radio" name="q2" value="b"> b) To update the hidden state</label>
+            <label><input type="radio" name="q2" value="c"> c) To control the input gate</label>
+            <label><input type="radio" name="q2" value="d"> d) To normalize the gradients</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>3. What is the main advantage of using Bidirectional RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q3" value="a"> a) They process data faster than unidirectional RNNs</label>
+            <label><input type="radio" name="q3" value="b"> b) They can capture context from both past and future data</label>
+            <label><input type="radio" name="q3" value="c"> c) They require less memory</label>
+            <label><input type="radio" name="q3" value="d"> d) They eliminate the need for backpropagation</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>4. What is the primary purpose of the "reset gate" in a GRU?</p>
+        <div class="options">
+            <label><input type="radio" name="q4" value="a"> a) To decide which information to discard from the memory</label>
+            <label><input type="radio" name="q4" value="b"> b) To decide which information to update in the memory</label>
+            <label><input type="radio" name="q4" value="c"> c) To control the output of the network</label>
+            <label><input type="radio" name="q4" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>5. What is the main challenge of training very deep RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q5" value="a"> a) Exploding gradients</label>
+            <label><input type="radio" name="q5" value="b"> b) Vanishing gradients</label>
+            <label><input type="radio" name="q5" value="c"> c) Overfitting</label>
+            <label><input type="radio" name="q5" value="d"> d) All of the above</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>6. What is the primary purpose of gradient clipping in RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q6" value="a"> a) To prevent vanishing gradients</label>
+            <label><input type="radio" name="q6" value="b"> b) To prevent exploding gradients</label>
+            <label><input type="radio" name="q6" value="c"> c) To speed up training</label>
+            <label><input type="radio" name="q6" value="d"> d) To reduce overfitting</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>7. What is the main difference between GRU and LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q7" value="a"> a) GRU has fewer gates than LSTM</label>
+            <label><input type="radio" name="q7" value="b"> b) GRU is computationally more expensive</label>
+            <label><input type="radio" name="q7" value="c"> c) GRU cannot handle long-term dependencies</label>
+            <label><input type="radio" name="q7" value="d"> d) GRU does not use a hidden state</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>8. What is the primary purpose of the "output gate" in LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q8" value="a"> a) To decide which information to output from the cell state</label>
+            <label><input type="radio" name="q8" value="b"> b) To update the hidden state</label>
+            <label><input type="radio" name="q8" value="c"> c) To control the input gate</label>
+            <label><input type="radio" name="q8" value="d"> d) To normalize the gradients</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>9. What is the main advantage of using Attention Mechanisms with RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q9" value="a"> a) They reduce the need for memory</label>
+            <label><input type="radio" name="q9" value="b"> b) They allow the model to focus on specific parts of the input sequence</label>
+            <label><input type="radio" name="q9" value="c"> c) They eliminate the need for backpropagation</label>
+            <label><input type="radio" name="q9" value="d"> d) They speed up training</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>10. What is the primary purpose of the "cell state" in LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q10" value="a"> a) To store long-term information</label>
+            <label><input type="radio" name="q10" value="b"> b) To store short-term information</label>
+            <label><input type="radio" name="q10" value="c"> c) To control the output gate</label>
+            <label><input type="radio" name="q10" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>11. What is the primary purpose of the "input gate" in LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q11" value="a"> a) To decide which information to discard from the memory</label>
+            <label><input type="radio" name="q11" value="b"> b) To decide which information to update in the memory</label>
+            <label><input type="radio" name="q11" value="c"> c) To control the output of the network</label>
+            <label><input type="radio" name="q11" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>12. What is the main advantage of using "peephole connections" in LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q12" value="a"> a) They allow the gates to access the cell state directly</label>
+            <label><input type="radio" name="q12" value="b"> b) They reduce the computational complexity</label>
+            <label><input type="radio" name="q12" value="c"> c) They eliminate the need for backpropagation</label>
+            <label><input type="radio" name="q12" value="d"> d) They speed up training</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>13. What is the primary purpose of the "candidate hidden state" in GRU?</p>
+        <div class="options">
+            <label><input type="radio" name="q13" value="a"> a) To store long-term information</label>
+            <label><input type="radio" name="q13" value="b"> b) To compute a new potential hidden state</label>
+            <label><input type="radio" name="q13" value="c"> c) To control the output gate</label>
+            <label><input type="radio" name="q13" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>14. What is the main challenge of using RNNs for very long sequences?</p>
+        <div class="options">
+            <label><input type="radio" name="q14" value="a"> a) Exploding gradients</label>
+            <label><input type="radio" name="q14" value="b"> b) Vanishing gradients</label>
+            <label><input type="radio" name="q14" value="c"> c) Overfitting</label>
+            <label><input type="radio" name="q14" value="d"> d) All of the above</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>15. What is the primary purpose of the "hidden state" in RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q15" value="a"> a) To store long-term information</label>
+            <label><input type="radio" name="q15" value="b"> b) To store short-term information</label>
+            <label><input type="radio" name="q15" value="c"> c) To control the output gate</label>
+            <label><input type="radio" name="q15" value="d"> d) To normalize the gradients</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>16. What is the main advantage of using "skip connections" in deep RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q16" value="a"> a) They reduce the vanishing gradient problem</label>
+            <label><input type="radio" name="q16" value="b"> b) They speed up training</label>
+            <label><input type="radio" name="q16" value="c"> c) They eliminate the need for backpropagation</label>
+            <label><input type="radio" name="q16" value="d"> d) They reduce overfitting</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>17. What is the primary purpose of the "cell state" in LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q17" value="a"> a) To store long-term information</label>
+            <label><input type="radio" name="q17" value="b"> b) To store short-term information</label>
+            <label><input type="radio" name="q17" value="c"> c) To control the output gate</label>
+            <label><input type="radio" name="q17" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>18. What is the main advantage of using "gradient clipping" in RNNs?</p>
+        <div class="options">
+            <label><input type="radio" name="q18" value="a"> a) To prevent vanishing gradients</label>
+            <label><input type="radio" name="q18" value="b"> b) To prevent exploding gradients</label>
+            <label><input type="radio" name="q18" value="c"> c) To speed up training</label>
+            <label><input type="radio" name="q18" value="d"> d) To reduce overfitting</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>19. What is the primary purpose of the "forget gate" in LSTM?</p>
+        <div class="options">
+            <label><input type="radio" name="q19" value="a"> a) To decide which information to discard from the memory</label>
+            <label><input type="radio" name="q19" value="b"> b) To decide which information to update in the memory</label>
+            <label><input type="radio" name="q19" value="c"> c) To control the output of the network</label>
+            <label><input type="radio" name="q19" value="d"> d) To normalize the hidden state</label>
+        </div>
+    </div>
+    
+    <div class="question">
+        <p>20. What is the main advantage of using "Bidirectional RNNs"?</p>
+        <div class="options">
+            <label><input type="radio" name="q20" value="a"> a) They process data faster than unidirectional RNNs</label>
+            <label><input type="radio" name="q20" value="b"> b) They can capture context from both past and future data</label>
+            <label><input type="radio" name="q20" value="c"> c) They require less memory</label>
+            <label><input type="radio" name="q20" value="d"> d) They eliminate the need for backpropagation</label>
+        </div>
+    </div>
+
+    <!-- Add more advanced questions here -->
+
+    <button onclick="calculateScore()">Submit Answers</button>
+
+    <div class="result" id="result">
+        <h2>Result</h2>
+        <p id="score"></p>
+        <p id="correctAnswers"></p>
+        <p id="wrongAnswers"></p>
+    </div>
+
+    <script>
+        // Correct answers
+        const correctAnswers = {
+    q1: "b",
+    q2: "a",
+    q3: "b",
+    q4: "a",
+    q5: "d",
+    q6: "b",
+    q7: "a",
+    q8: "a",
+    q9: "b",
+    q10: "a",
+    q11: "b", // الإجابة الصحيحة للسؤال 11
+    q12: "a", // الإجابة الصحيحة للسؤال 12
+    q13: "b", // الإجابة الصحيحة للسؤال 13
+    q14: "d", // الإجابة الصحيحة للسؤال 14
+    q15: "b", // الإجابة الصحيحة للسؤال 15
+    q16: "a", // الإجابة الصحيحة للسؤال 16
+    q17: "a", // الإجابة الصحيحة للسؤال 17
+    q18: "b", // الإجابة الصحيحة للسؤال 18
+    q19: "a", // الإجابة الصحيحة للسؤال 19
+    q20: "b", // الإجابة الصحيحة للسؤال 20
+    // أضف بقية الإجابات هنا
+};
+
+        // Function to calculate the score
+        function calculateScore() {
+            let score = 0;
+            let correct = [];
+            let wrong = [];
+
+            // Check answers
+            for (const question in correctAnswers) {
+                const selectedAnswer = document.querySelector(`input[name="${question}"]:checked`);
+                if (selectedAnswer) {
+                    if (selectedAnswer.value === correctAnswers[question]) {
+                        score++;
+                        correct.push(question);
+                    } else {
+                        wrong.push(question);
+                    }
+                } else {
+                    wrong.push(question);
+                }
+            }
+
+            // Display the result
+            const totalQuestions = Object.keys(correctAnswers).length;
+            const resultDiv = document.getElementById("result");
+            document.getElementById("score").innerText = `Score: ${score} out of ${totalQuestions}`;
+            document.getElementById("correctAnswers").innerHTML = `Correct Answers: <span class="correct">${correct.join(", ")}</span>`;
+            document.getElementById("wrongAnswers").innerHTML = `Wrong Answers: <span class="wrong">${wrong.join(", ")}</span>`;
+            resultDiv.style.display = "block";
+        }
+    </script>
+</body>
+</html>
