@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced RNN and GRU Quiz</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --hover-color: #45a049;
+            --background-color: #f9f9f9;
+            --card-color: #fff;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: var(--background-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .question-card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .question-text {
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: #dff0d8;
+            color: #3c763d;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: #f2dede;
+            color: #a94442;
+            display: block;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto;
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .result-container {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .question-card {
+                padding: 15px;
+            }
+        } </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced RNN and GRU Quiz</h1>
+        
+        <div class="score-display" id="currentScore">
+            Current Score: <span id="score">0</span>
+        </div>
+
+        <div id="quiz-container"></div>
+
+        <button class="submit-btn" onclick="calculateFinalScore()">Submit Quiz</button>
+
+        <div class="result-container" id="result">
+            <h2>Final Results</h2>
+            <p id="finalScore"></p>
+            <p id="percentage"></p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 'q1',
+                text: 'What is the primary purpose of the "update gate" in a GRU?',
+                options: [
+                    { value: 'a', text: 'To decide which information to discard from the memory' },
+                    { value: 'b', text: 'To decide which information to update in the memory' },
+                    { value: 'c', text: 'To control the output of the network' },
+                    { value: 'd', text: 'To normalize the hidden state' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q2',
+                text: 'In LSTM, what is the role of the "forget gate"?',
+                options: [
+                    { value: 'a', text: 'To decide which information to keep or discard from the cell state' },
+                    { value: 'b', text: 'To update the hidden state' },
+                    { value: 'c', text: 'To control the input gate' },
+                    { value: 'd', text: 'To normalize the gradients' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q3',
+                text: 'What is the main advantage of using Bidirectional RNNs?',
+                options: [
+                    { value: 'a', text: 'They process data faster than unidirectional RNNs' },
+                    { value: 'b', text: 'They can capture context from both past and future data' },
+                    { value: 'c', text: 'They require less memory' },
+                    { value: 'd', text: 'They eliminate the need for backpropagation' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q4',
+                text: 'What is the primary purpose of the "reset gate" in a GRU?',
+                options: [
+                    { value: 'a', text: 'To decide which information to discard from the memory' },
+                    { value: 'b', text: 'To decide which information to update in the memory' },
+                    { value: 'c', text: 'To control the output of the network' },
+                    { value: 'd', text: 'To normalize the hidden state' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q5',
+                text: 'What is the main challenge of training very deep RNNs?',
+                options: [
+                    { value: 'a', text: 'Exploding gradients' },
+                    { value: 'b', text: 'Vanishing gradients' },
+                    { value: 'c', text: 'Overfitting' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q6',
+                text: 'What is the primary purpose of gradient clipping in RNNs?',
+                options: [
+                    { value: 'a', text: 'To prevent vanishing gradients' },
+                    { value: 'b', text: 'To prevent exploding gradients' },
+                    { value: 'c', text: 'To speed up training' },
+                    { value: 'd', text: 'To reduce overfitting' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q7',
+                text: 'What is the main difference between GRU and LSTM?',
+                options: [
+                    { value: 'a', text: 'GRU has fewer gates than LSTM' },
+                    { value: 'b', text: 'GRU is computationally more expensive' },
+                    { value: 'c', text: 'GRU cannot handle long-term dependencies' },
+                    { value: 'd', text: 'GRU does not use a hidden state' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q8',
+                text: 'What is the primary purpose of the "output gate" in LSTM?',
+                options: [
+                    { value: 'a', text: 'To decide which information to output from the cell state' },
+                    { value: 'b', text: 'To update the hidden state' },
+                    { value: 'c', text: 'To control the input gate' },
+                    { value: 'd', text: 'To normalize the gradients' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q9',
+                text: 'What is the main advantage of using Attention Mechanisms with RNNs?',
+                options: [
+                    { value: 'a', text: 'They reduce the need for memory' },
+                    { value: 'b', text: 'They allow the model to focus on specific parts of the input sequence' },
+                    { value: 'c', text: 'They eliminate the need for backpropagation' },
+                    { value: 'd', text: 'They speed up training' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q10',
+                text: 'What is the primary purpose of the "cell state" in LSTM?',
+                options: [
+                    { value: 'a', text: 'To store long-term information' },
+                    { value: 'b', text: 'To store short-term information' },
+                    { value: 'c', text: 'To control the output gate' },
+                    { value: 'd', text: 'To normalize the hidden state' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q11',
+                text: 'What is the key feature of an RNN?',
+                options: [
+                    { value: 'a', text: 'It processes data in parallel' },
+                    { value: 'b', text: 'It has memory to retain information from previous steps' },
+                    { value: 'c', text: 'It is only used for image data' },
+                    { value: 'd', text: 'It does not use activation functions' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q12',
+                text: 'What is the main problem with standard RNNs?',
+                options: [
+                    { value: 'a', text: 'They are too fast' },
+                    { value: 'b', text: 'They suffer from vanishing gradients' },
+                    { value: 'c', text: 'They cannot handle sequential data' },
+                    { value: 'd', text: 'They require too much memory' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q13',
+                text: 'Which activation function is commonly used in RNNs?',
+                options: [
+                    { value: 'a', text: 'ReLU' },
+                    { value: 'b', text: 'Sigmoid' },
+                    { value: 'c', text: 'Tanh' },
+                    { value: 'd', text: 'Softmax' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q14',
+                text: 'What is the output of an RNN at time step \( t \) dependent on?',
+                options: [
+                    { value: 'a', text: 'Only the current input \( x_t \)' },
+                    { value: 'b', text: 'Only the previous hidden state \( h_{t-1} \)' },
+                    { value: 'c', text: 'Both the current input \( x_t \) and the previous hidden state \( h_{t-1} \)' },
+                    { value: 'd', text: 'Neither the current input nor the previous hidden state' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q15',
+                text: 'What is the purpose of the Softmax function in an RNN?',
+                options: [
+                    { value: 'a', text: 'To extract features' },
+                    { value: 'b', text: 'To classify the output into probabilities' },
+                    { value: 'c', text: 'To reduce dimensionality' },
+                    { value: 'd', text: 'To apply non-linearity' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q16',
+                text: 'What is the main advantage of GRUs over standard RNNs?',
+                options: [
+                    { value: 'a', text: 'They have fewer parameters' },
+                    { value: 'b', text: 'They solve the vanishing gradient problem' },
+                    { value: 'c', text: 'They are faster to train' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q17',
+                text: 'What is the role of the Update Gate in a GRU?',
+                options: [
+                    { value: 'a', text: 'To decide what information to forget' },
+                    { value: 'b', text: 'To decide what information to keep' },
+                    { value: 'c', text: 'To apply non-linearity' },
+                    { value: 'd', text: 'To reduce dimensionality' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q18',
+                text: 'What is the output of the Update Gate when its value is 0?',
+                options: [
+                    { value: 'a', text: 'The memory cell is reset' },
+                    { value: 'b', text: 'The memory cell retains its previous value' },
+                    { value: 'c', text: 'The memory cell is updated with new information' },
+                    { value: 'd', text: 'The memory cell is deleted' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q19',
+                text: 'Which gate in a GRU is responsible for determining the relevance of the current input?',
+                options: [
+                    { value: 'a', text: 'Update Gate' },
+                    { value: 'b', text: 'Reset Gate' },
+                    { value: 'c', text: 'Forget Gate' },
+                    { value: 'd', text: 'Output Gate' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q20',
+                text: 'What is the main difference between GRUs and LSTMs?',
+                options: [
+                    { value: 'a', text: 'GRUs have fewer gates' },
+                    { value: 'b', text: 'LSTMs are faster to train' },
+                    { value: 'c', text: 'GRUs do not use activation functions' },
+                    { value: 'd', text: 'LSTMs do not have memory cells' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q20',
+                text: 'What is the main difference between GRUs and LSTMs?',
+                options: [
+                    { value: 'a', text: 'GRUs have fewer gates' },
+                    { value: 'b', text: 'LSTMs are faster to train' },
+                    { value: 'c', text: 'GRUs do not use activation functions' },
+                    { value: 'd', text: 'LSTMs do not have memory cells' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q21',
+                text: 'What is the purpose of the Forget Gate in an LSTM?',
+                options: [
+                    { value: 'a', text: 'To decide what information to keep' },
+                    { value: 'b', text: 'To decide what information to forget' },
+                    { value: 'c', text: 'To apply non-linearity' },
+                    { value: 'd', text: 'To reduce dimensionality' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q22',
+                text: 'What is the role of the Output Gate in an LSTM?',
+                options: [
+                    { value: 'a', text: 'To control the output of the memory cell' },
+                    { value: 'b', text: 'To decide what information to forget' },
+                    { value: 'c', text: 'To apply non-linearity' },
+                    { value: 'd', text: 'To reduce dimensionality' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q23',
+                text: 'Which gate in an LSTM is responsible for updating the memory cell?',
+                options: [
+                    { value: 'a', text: 'Forget Gate' },
+                    { value: 'b', text: 'Input Gate' },
+                    { value: 'c', text: 'Output Gate' },
+                    { value: 'd', text: 'Update Gate' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q24',
+                text: 'What is the main advantage of LSTMs over GRUs?',
+                options: [
+                    { value: 'a', text: 'LSTMs are faster to train' },
+                    { value: 'b', text: 'LSTMs have fewer parameters' },
+                    { value: 'c', text: 'LSTMs can handle longer sequences better' },
+                    { value: 'd', text: 'LSTMs do not use activation functions' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q25',
+                text: 'What is the output of the Forget Gate when its value is 1?',
+                options: [
+                    { value: 'a', text: 'The memory cell is reset' },
+                    { value: 'b', text: 'The memory cell retains its previous value' },
+                    { value: 'c', text: 'The memory cell is updated with new information' },
+                    { value: 'd', text: 'The memory cell is deleted' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q26',
+                text: 'Which of the following is NOT a use case for CNNs?',
+                options: [
+                    { value: 'a', text: 'Image classification' },
+                    { value: 'b', text: 'Speech recognition' },
+                    { value: 'c', text: 'Object detection' },
+                    { value: 'd', text: 'Text translation' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q27',
+                text: 'Which of the following is a use case for RNNs?',
+                options: [
+                    { value: 'a', text: 'Image classification' },
+                    { value: 'b', text: 'Time series prediction' },
+                    { value: 'c', text: 'Object detection' },
+                    { value: 'd', text: 'Feature extraction' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q28',
+                text: 'What is the main difference between CNNs and RNNs?',
+                options: [
+                    { value: 'a', text: 'CNNs are used for sequential data, while RNNs are used for spatial data' },
+                    { value: 'b', text: 'CNNs are used for spatial data, while RNNs are used for sequential data' },
+                    { value: 'c', text: 'CNNs are faster to train than RNNs' },
+                    { value: 'd', text: 'CNNs do not use activation functions' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q29',
+                text: 'Which of the following is true about LSTMs?',
+                options: [
+                    { value: 'a', text: 'They have fewer gates than GRUs' },
+                    { value: 'b', text: 'They are faster to train than GRUs' },
+                    { value: 'c', text: 'They can handle longer sequences than GRUs' },
+                    { value: 'd', text: 'They do not use memory cells' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q30',
+                text: 'What is the main purpose of the memory cell in LSTMs and GRUs?',
+                options: [
+                    { value: 'a', text: 'To store temporary data' },
+                    { value: 'b', text: 'To retain information over long sequences' },
+                    { value: 'c', text: 'To reduce dimensionality' },
+                    { value: 'd', text: 'To apply non-linearity' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q31',
+                text: 'What is the primary goal of Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'To classify the entire image into a single label' },
+                    { value: 'b', text: 'To divide the image into multiple segments or regions' },
+                    { value: 'c', text: 'To detect objects in the image' },
+                    { value: 'd', text: 'To reduce the image resolution' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q32',
+                text: 'Which of the following is a type of Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic Segmentation' },
+                    { value: 'b', text: 'Instance Segmentation' },
+                    { value: 'c', text: 'Panoptic Segmentation' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q33',
+                text: 'What is the main difference between Semantic Segmentation and Instance Segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic Segmentation assigns a label to each pixel, while Instance Segmentation identifies individual objects' },
+                    { value: 'b', text: 'Semantic Segmentation is faster than Instance Segmentation' },
+                    { value: 'c', text: 'Instance Segmentation is used only for medical images' },
+                    { value: 'd', text: 'There is no difference' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q34',
+                text: 'What is the purpose of a Bounding Box in Object Detection?',
+                options: [
+                    { value: 'a', text: 'To classify the image' },
+                    { value: 'b', text: 'To localize and identify objects in the image' },
+                    { value: 'c', text: 'To reduce the image size' },
+                    { value: 'd', text: 'To apply filters to the image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q35',
+                text: 'What is the Intersection over Union (IoU) metric used for in Object Detection?',
+                options: [
+                    { value: 'a', text: 'To measure the accuracy of object classification' },
+                    { value: 'b', text: 'To measure the overlap between predicted and ground truth bounding boxes' },
+                    { value: 'c', text: 'To calculate the resolution of the image' },
+                    { value: 'd', text: 'To determine the number of objects in the image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q36',
+                text: 'Which of the following is a common application of Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'Medical imaging (e.g., tumor detection)' },
+                    { value: 'b', text: 'Autonomous driving' },
+                    { value: 'c', text: 'Augmented reality' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q37',
+                text: 'What is the main challenge in Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'Ambiguity in object boundaries' },
+                    { value: 'b', text: 'High computational cost' },
+                    { value: 'c', text: 'Over-segmentation and under-segmentation' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q38',
+                text: 'What is the role of the Fully Convolutional Network (FCN) in Semantic Segmentation?',
+                options: [
+                    { value: 'a', text: 'To classify the entire image' },
+                    { value: 'b', text: 'To produce pixel-wise predictions' },
+                    { value: 'c', text: 'To detect objects in the image' },
+                    { value: 'd', text: 'To reduce the image size' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q39',
+                text: 'What is the purpose of the U-Net architecture in Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'To classify images' },
+                    { value: 'b', text: 'To detect objects' },
+                    { value: 'c', text: 'To perform precise segmentation, especially in medical images' },
+                    { value: 'd', text: 'To reduce the computational cost' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q40',
+                text: 'What is the main advantage of using Mask R-CNN over Faster R-CNN?',
+                options: [
+                    { value: 'a', text: 'Mask R-CNN provides pixel-level segmentation in addition to object detection' },
+                    { value: 'b', text: 'Mask R-CNN is faster than Faster R-CNN' },
+                    { value: 'c', text: 'Mask R-CNN does not require bounding boxes' },
+                    { value: 'd', text: 'Mask R-CNN is used only for text detection' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q41',
+                text: 'What is the main purpose of Non-Max Suppression (NMS) in Object Detection?',
+                options: [
+                    { value: 'a', text: 'To remove overlapping bounding boxes' },
+                    { value: 'b', text: 'To increase the number of detected objects' },
+                    { value: 'c', text: 'To classify objects' },
+                    { value: 'd', text: 'To reduce the image resolution' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q42',
+                text: 'What is the main difference between One-Stage and Two-Stage Object Detectors?',
+                options: [
+                    { value: 'a', text: 'One-Stage detectors are faster but less accurate than Two-Stage detectors' },
+                    { value: 'b', text: 'Two-Stage detectors are faster but less accurate than One-Stage detectors' },
+                    { value: 'c', text: 'One-Stage detectors do not use bounding boxes' },
+                    { value: 'd', text: 'Two-Stage detectors do not use convolutional layers' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q43',
+                text: 'Which of the following is an example of a One-Stage Object Detector?',
+                options: [
+                    { value: 'a', text: 'YOLO (You Only Look Once)' },
+                    { value: 'b', text: 'Faster R-CNN' },
+                    { value: 'c', text: 'Mask R-CNN' },
+                    { value: 'd', text: 'R-FCN' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q44',
+                text: 'What is the main advantage of using YOLO for Object Detection?',
+                options: [
+                    { value: 'a', text: 'It is very fast and suitable for real-time applications' },
+                    { value: 'b', text: 'It provides the most accurate bounding boxes' },
+                    { value: 'c', text: 'It does not require training data' },
+                    { value: 'd', text: 'It is used only for medical images' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q45',
+                text: 'What is the purpose of Anchor Boxes in Object Detection?',
+                options: [
+                    { value: 'a', text: 'To predict bounding boxes of different shapes and sizes' },
+                    { value: 'b', text: 'To classify objects' },
+                    { value: 'c', text: 'To reduce the image resolution' },
+                    { value: 'd', text: 'To apply filters to the image' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q46',
+                text: 'What is the main challenge in training deep learning models for Object Detection?',
+                options: [
+                    { value: 'a', text: 'High computational cost' },
+                    { value: 'b', text: 'Need for large labeled datasets' },
+                    { value: 'c', text: 'Difficulty in detecting small objects' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q47',
+                text: 'What is the main purpose of the Dice Coefficient in Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'To measure the overlap between predicted and ground truth segmentation masks' },
+                    { value: 'b', text: 'To classify objects' },
+                    { value: 'c', text: 'To reduce the image resolution' },
+                    { value: 'd', text: 'To apply filters to the image' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q48',
+                text: 'What is the main advantage of using Panoptic Segmentation over Semantic Segmentation?',
+                options: [
+                    { value: 'a', text: 'It combines both semantic and instance segmentation' },
+                    { value: 'b', text: 'It is faster than Semantic Segmentation' },
+                    { value: 'c', text: 'It does not require labeled data' },
+                    { value: 'd', text: 'It is used only for medical images' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q49',
+                text: 'What is the main purpose of the Region Proposal Network (RPN) in Faster R-CNN?',
+                options: [
+                    { value: 'a', text: 'To generate potential bounding boxes for objects' },
+                    { value: 'b', text: 'To classify objects' },
+                    { value: 'c', text: 'To reduce the image resolution' },
+                    { value: 'd', text: 'To apply filters to the image' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q50',
+                text: 'What is the main advantage of using Deep Learning for Image Segmentation?',
+                options: [
+                    { value: 'a', text: 'It can automatically learn features from data' },
+                    { value: 'b', text: 'It requires less computational power' },
+                    { value: 'c', text: 'It does not require labeled data' },
+                    { value: 'd', text: 'It is used only for small datasets' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q51',
+                text: 'What is the primary innovation behind EfficientNet\'s efficiency?',
+                options: [
+                    { value: 'a', text: 'Use of Residual Connections' },
+                    { value: 'b', text: 'Compound Scaling of depth, width, and resolution' },
+                    { value: 'c', text: 'Increasing the number of parameters exponentially' },
+                    { value: 'd', text: 'Using only fully connected layers' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q52',
+                text: 'Which of the following is NOT a component of the MBConv block in EfficientNet?',
+                options: [
+                    { value: 'a', text: 'Expansion Layer' },
+                    { value: 'b', text: 'Depthwise Convolution' },
+                    { value: 'c', text: 'Max Pooling Layer' },
+                    { value: 'd', text: 'Squeeze-and-Excitation' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q53',
+                text: 'In Compound Scaling, what does the parameter ϕ represent?',
+                options: [
+                    { value: 'a', text: 'The scaling factor for depth only' },
+                    { value: 'b', text: 'The compound scaling factor for depth, width, and resolution' },
+                    { value: 'c', text: 'The number of layers in the network' },
+                    { value: 'd', text: 'The input image resolution' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q54',
+                text: 'Which technique in EfficientNet helps the model focus on the most important channels?',
+                options: [
+                    { value: 'a', text: 'Depthwise Convolution' },
+                    { value: 'b', text: 'Squeeze-and-Excitation' },
+                    { value: 'c', text: 'Batch Normalization' },
+                    { value: 'd', text: 'Dropout' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q55',
+                text: 'What is the purpose of the Expansion Layer in the MBConv block?',
+                options: [
+                    { value: 'a', text: 'To reduce the number of channels' },
+                    { value: 'b', text: 'To increase the number of channels using 1x1 convolutions' },
+                    { value: 'c', text: 'To apply a filter to each channel separately' },
+                    { value: 'd', text: 'To downsample the feature map' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q56',
+                text: 'Which of the following models is NOT compared to EfficientNet in terms of efficiency?',
+                options: [
+                    { value: 'a', text: 'ResNet-50' },
+                    { value: 'b', text: 'Inception-v2' },
+                    { value: 'c', text: 'VGG-16' },
+                    { value: 'd', text: 'NASNet-A' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q57',
+                text: 'What is the main advantage of using Depthwise Convolution in EfficientNet?',
+                options: [
+                    { value: 'a', text: 'It increases the number of parameters' },
+                    { value: 'b', text: 'It reduces computational cost by applying filters separately to each channel' },
+                    { value: 'c', text: 'It increases the resolution of the input image' },
+                    { value: 'd', text: 'It replaces fully connected layers' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q58',
+                text: 'Which of the following is a key benefit of Compound Scaling?',
+                options: [
+                    { value: 'a', text: 'It allows the model to scale only in depth' },
+                    { value: 'b', text: 'It balances the scaling of depth, width, and resolution for optimal performance' },
+                    { value: 'c', text: 'It increases the number of parameters exponentially' },
+                    { value: 'd', text: 'It reduces the need for convolutional layers' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q59',
+                text: 'What is the role of the Projection Layer in the MBConv block?',
+                options: [
+                    { value: 'a', text: 'To increase the number of channels' },
+                    { value: 'b', text: 'To reduce the number of channels back to the original size' },
+                    { value: 'c', text: 'To apply Depthwise Convolution' },
+                    { value: 'd', text: 'To perform global average pooling' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q60',
+                text: 'Which of the following is a trade-off addressed by EfficientNet?',
+                options: [
+                    { value: 'a', text: 'Increasing model size without improving accuracy' },
+                    { value: 'b', text: 'Reducing accuracy to improve speed' },
+                    { value: 'c', text: 'Balancing model performance and resource efficiency' },
+                    { value: 'd', text: 'Using only fully connected layers for feature extraction' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q61',
+                text: 'What is the primary purpose of the Squeeze-and-Excitation block?',
+                options: [
+                    { value: 'a', text: 'To downsample the feature map' },
+                    { value: 'b', text: 'To reweight the channels based on their importance' },
+                    { value: 'c', text: 'To increase the number of parameters' },
+                    { value: 'd', text: 'To replace Depthwise Convolution' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q62',
+                text: 'Which of the following is a scaling equation used in Compound Scaling?',
+                options: [
+                    { value: 'a', text: 'depth = αϕ' },
+                    { value: 'b', text: 'width = βϕ' },
+                    { value: 'c', text: 'resolution = γϕ' },
+                    { value: 'd', text: 'All of the above' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q63',
+                text: 'What is the main reason EfficientNet is suitable for mobile devices?',
+                options: [
+                    { value: 'a', text: 'It uses only fully connected layers' },
+                    { value: 'b', text: 'It has a very large number of parameters' },
+                    { value: 'c', text: 'It balances high accuracy with low computational cost' },
+                    { value: 'd', text: 'It does not use convolutional layers' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q64',
+                text: 'Which of the following techniques is NOT used in EfficientNet?',
+                options: [
+                    { value: 'a', text: 'Depthwise Separable Convolutions' },
+                    { value: 'b', text: 'Squeeze-and-Excitation' },
+                    { value: 'c', text: 'Compound Scaling' },
+                    { value: 'd', text: 'Recurrent Neural Networks (RNNs)' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q65',
+                text: 'What is the primary goal of EfficientNet\'s architecture?',
+                options: [
+                    { value: 'a', text: 'To maximize the number of parameters' },
+                    { value: 'b', text: 'To achieve state-of-the-art accuracy with minimal resource usage' },
+                    { value: 'c', text: 'To eliminate the use of convolutional layers' },
+                    { value: 'd', text: 'To focus only on increasing depth' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q66',
+                text: 'What is the primary goal of object detection?',
+                options: [
+                    { value: 'a', text: 'Classify objects in an image' },
+                    { value: 'b', text: 'Locate and classify objects in an image' },
+                    { value: 'c', text: 'Segment objects in an image' },
+                    { value: 'd', text: 'Track objects in a video' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q67',
+                text: 'Which of the following is NOT a task in object detection?',
+                options: [
+                    { value: 'a', text: 'Classification' },
+                    { value: 'b', text: 'Localization' },
+                    { value: 'c', text: 'Image segmentation' },
+                    { value: 'd', text: 'Object tracking' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q68',
+                text: 'What does IoU (Intersection over Union) measure?',
+                options: [
+                    { value: 'a', text: 'The overlap between predicted and ground truth bounding boxes' },
+                    { value: 'b', text: 'The speed of object detection' },
+                    { value: 'c', text: 'The accuracy of image classification' },
+                    { value: 'd', text: 'The number of objects detected' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q69',
+                text: 'Which of the following is an example of a two-stage object detector?',
+                options: [
+                    { value: 'a', text: 'YOLO' },
+                    { value: 'b', text: 'SSD' },
+                    { value: 'c', text: 'Faster R-CNN' },
+                    { value: 'd', text: 'RetinaNet' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q70',
+                text: 'What is the main advantage of single-shot detectors like YOLO?',
+                options: [
+                    { value: 'a', text: 'Higher accuracy' },
+                    { value: 'b', text: 'Faster speed' },
+                    { value: 'c', text: 'Better handling of small objects' },
+                    { value: 'd', text: 'More complex architecture' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q71',
+                text: 'In YOLO, what does the grid cell predict?',
+                options: [
+                    { value: 'a', text: 'Only bounding box coordinates' },
+                    { value: 'b', text: 'Only class probabilities' },
+                    { value: 'c', text: 'Bounding box coordinates, confidence score, and class probabilities' },
+                    { value: 'd', text: 'Only confidence score' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q72',
+                text: 'What is the purpose of taking the square root of width and height in YOLO\'s loss function?',
+                options: [
+                    { value: 'a', text: 'To increase the range of values' },
+                    { value: 'b', text: 'To penalize large errors proportionally' },
+                    { value: 'c', text: 'To reduce the complexity of the model' },
+                    { value: 'd', text: 'To improve classification accuracy' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q73',
+                text: 'What is the primary goal of image segmentation?',
+                options: [
+                    { value: 'a', text: 'To compress images' },
+                    { value: 'b', text: 'To partition an image into meaningful regions' },
+                    { value: 'c', text: 'To enhance image resolution' },
+                    { value: 'd', text: 'To remove noise from images' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q74',
+                text: 'Which of the following is NOT a type of image segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic segmentation' },
+                    { value: 'b', text: 'Instance segmentation' },
+                    { value: 'c', text: 'Panoptic segmentation' },
+                    { value: 'd', text: 'Edge compression' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q75',
+                text: 'In semantic segmentation, what does "stuff" refer to?',
+                options: [
+                    { value: 'a', text: 'Countable objects' },
+                    { value: 'b', text: 'Uncountable regions like sky or road' },
+                    { value: 'c', text: 'Noise in the image' },
+                    { value: 'd', text: 'Edges in the image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q76',
+                text: 'Which deep learning architecture is specifically designed for biomedical image segmentation?',
+                options: [
+                    { value: 'a', text: 'ResNet' },
+                    { value: 'b', text: 'U-Net' },
+                    { value: 'c', text: 'VGG' },
+                    { value: 'd', text: 'AlexNet' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q77',
+                text: 'What is the key innovation in the U-Net architecture?',
+                options: [
+                    { value: 'a', text: 'Pooling layers' },
+                    { value: 'b', text: 'Skip connections' },
+                    { value: 'c', text: 'Fully connected layers' },
+                    { value: 'd', text: 'Dropout layers' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q78',
+                text: 'Which of the following is a common evaluation metric for segmentation tasks?',
+                options: [
+                    { value: 'a', text: 'Mean Squared Error (MSE)' },
+                    { value: 'b', text: 'DICE coefficient' },
+                    { value: 'c', text: 'F1 Score' },
+                    { value: 'd', text: 'Precision' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q79',
+                text: 'What does the DICE coefficient measure?',
+                options: [
+                    { value: 'a', text: 'The difference between predicted and ground truth masks' },
+                    { value: 'b', text: 'The overlap between predicted and ground truth masks' },
+                    { value: 'c', text: 'The accuracy of object detection' },
+                    { value: 'd', text: 'The resolution of the image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q80',
+                text: 'Which technique is used in instance segmentation to differentiate between objects of the same class?',
+                options: [
+                    { value: 'a', text: 'Semantic labeling' },
+                    { value: 'b', text: 'Bounding boxes' },
+                    { value: 'c', text: 'Pixel-wise masks' },
+                    { value: 'd', text: 'Edge detection' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q81',
+                text: 'What is the main challenge in image segmentation caused by lighting variations?',
+                options: [
+                    { value: 'a', text: 'Over-segmentation' },
+                    { value: 'b', text: 'Under-segmentation' },
+                    { value: 'c', text: 'Ambiguity and noise' },
+                    { value: 'd', text: 'Computational complexity' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q82',
+                text: 'Which of the following is a traditional segmentation technique?',
+                options: [
+                    { value: 'a', text: 'U-Net' },
+                    { value: 'b', text: 'Mask R-CNN' },
+                    { value: 'c', text: 'Region-based segmentation' },
+                    { value: 'd', text: 'DeepLab' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q83',
+                text: 'What is the purpose of thresholding in image segmentation?',
+                options: [
+                    { value: 'a', text: 'To detect edges' },
+                    { value: 'b', text: 'To divide an image into regions based on intensity values' },
+                    { value: 'c', text: 'To remove noise' },
+                    { value: 'd', text: 'To enhance image resolution' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q84',
+                text: 'Which of the following is a clustering-based segmentation algorithm?',
+                options: [
+                    { value: 'a', text: 'Sobel' },
+                    { value: 'b', text: 'K-means' },
+                    { value: 'c', text: 'Canny' },
+                    { value: 'd', text: 'Prewitt' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q85',
+                text: 'What is the primary use of skip connections in U-Net?',
+                options: [
+                    { value: 'a', text: 'To reduce computational complexity' },
+                    { value: 'b', text: 'To preserve spatial information' },
+                    { value: 'c', text: 'To increase image resolution' },
+                    { value: 'd', text: 'To remove noise' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q86',
+                text: 'Which of the following is a common application of image segmentation in medical imaging?',
+                options: [
+                    { value: 'a', text: 'Object tracking' },
+                    { value: 'b', text: 'Tumor detection' },
+                    { value: 'c', text: 'Augmented reality' },
+                    { value: 'd', text: 'Image compression' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q87',
+                text: 'What is the main difference between semantic and instance segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic segmentation detects edges, while instance segmentation detects regions' },
+                    { value: 'b', text: 'Semantic segmentation labels pixels, while instance segmentation differentiates object instances' },
+                    { value: 'c', text: 'Semantic segmentation uses clustering, while instance segmentation uses thresholding' },
+                    { value: 'd', text: 'Semantic segmentation is faster than instance segmentation' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q88',
+                text: 'Which of the following is a common edge detection technique?',
+                options: [
+                    { value: 'a', text: 'K-means' },
+                    { value: 'b', text: 'Sobel' },
+                    { value: 'c', text: 'Region growing' },
+                    { value: 'd', text: 'Thresholding' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q89',
+                text: 'What is the main advantage of adaptive thresholding over global thresholding?',
+                options: [
+                    { value: 'a', text: 'It uses a single threshold for the entire image' },
+                    { value: 'b', text: 'It uses different thresholds for different regions of the image' },
+                    { value: 'c', text: 'It is faster than global thresholding' },
+                    { value: 'd', text: 'It is less accurate than global thresholding' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q90',
+                text: 'Which of the following is a common loss function used in U-Net?',
+                options: [
+                    { value: 'a', text: 'Mean Squared Error (MSE)' },
+                    { value: 'b', text: 'Cross-entropy loss' },
+                    { value: 'c', text: 'Hinge loss' },
+                    { value: 'd', text: 'Logistic loss' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q91',
+                text: 'What is a key advantage of RNNs over traditional neural networks?',
+                options: [
+                    { value: 'a', text: 'They use convolutional layers' },
+                    { value: 'b', text: 'They share weights across time steps' },
+                    { value: 'c', text: 'They require less data' },
+                    { value: 'd', text: 'They do not need backpropagation' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q92',
+                text: 'Which of the following is NOT an application of sequence models?',
+                options: [
+                    { value: 'a', text: 'Speech recognition' },
+                    { value: 'b', text: 'Image classification' },
+                    { value: 'c', text: 'Sentiment analysis' },
+                    { value: 'd', text: 'Video activity recognition' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q93',
+                text: 'In a one-to-many RNN architecture, what is the input and output?',
+                options: [
+                    { value: 'a', text: 'One input, one output' },
+                    { value: 'b', text: 'Many inputs, one output' },
+                    { value: 'c', text: 'One input, many outputs' },
+                    { value: 'd', text: 'Many inputs, many outputs' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q94',
+                text: 'What is the primary challenge of RNNs in handling long-term dependencies?',
+                options: [
+                    { value: 'a', text: 'Exploding gradients' },
+                    { value: 'b', text: 'Vanishing gradients' },
+                    { value: 'c', text: 'Overfitting' },
+                    { value: 'd', text: 'High computational cost' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q95',
+                text: 'Which activation function is commonly used in RNNs?',
+                options: [
+                    { value: 'a', text: 'Sigmoid' },
+                    { value: 'b', text: 'ReLU' },
+                    { value: 'c', text: 'Tanh' },
+                    { value: 'd', text: 'Softmax' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q96',
+                text: 'What is the purpose of the hidden state in an RNN?',
+                options: [
+                    { value: 'a', text: 'To store the final output' },
+                    { value: 'b', text: 'To remember previous inputs' },
+                    { value: 'c', text: 'To compute the loss' },
+                    { value: 'd', text: 'To initialize weights' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q97',
+                text: 'Which of the following is a variant of RNNs designed to handle long-term dependencies?',
+                options: [
+                    { value: 'a', text: 'CNN' },
+                    { value: 'b', text: 'LSTM' },
+                    { value: 'c', text: 'Autoencoder' },
+                    { value: 'd', text: 'Perceptron' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q98',
+                text: 'In sentiment classification, what is the input and output?',
+                options: [
+                    { value: 'a', text: 'One input, one output' },
+                    { value: 'b', text: 'Many inputs, one output' },
+                    { value: 'c', text: 'One input, many outputs' },
+                    { value: 'd', text: 'Many inputs, many outputs' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q99',
+                text: 'What is the process of propagating gradients backward through time in RNNs called?',
+                options: [
+                    { value: 'a', text: 'Gradient descent' },
+                    { value: 'b', text: 'Backpropagation through time (BPTT)' },
+                    { value: 'c', text: 'Forward pass' },
+                    { value: 'd', text: 'Weight initialization' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q100',
+                text: 'Which of the following is NOT a type of RNN architecture?',
+                options: [
+                    { value: 'a', text: 'One-to-many' },
+                    { value: 'b', text: 'Many-to-one' },
+                    { value: 'c', text: 'Many-to-many' },
+                    { value: 'd', text: 'One-to-one' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q101',
+                text: 'What is the main purpose of the output layer in an RNN?',
+                options: [
+                    { value: 'a', text: 'To store the hidden state' },
+                    { value: 'b', text: 'To compute the final prediction' },
+                    { value: 'c', text: 'To initialize weights' },
+                    { value: 'd', text: 'To compute gradients' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q102',
+                text: 'Which of the following is a common application of many-to-many RNNs?',
+                options: [
+                    { value: 'a', text: 'Image captioning' },
+                    { value: 'b', text: 'Sentiment analysis' },
+                    { value: 'c', text: 'Machine translation' },
+                    { value: 'd', text: 'Speech recognition' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q103',
+                text: 'What is the role of the forget gate in an LSTM?',
+                options: [
+                    { value: 'a', text: 'To store new information' },
+                    { value: 'b', text: 'To remove irrelevant information' },
+                    { value: 'c', text: 'To compute the output' },
+                    { value: 'd', text: 'To initialize weights' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q104',
+                text: 'Which of the following is a solution to the vanishing gradient problem?',
+                options: [
+                    { value: 'a', text: 'Using ReLU activation' },
+                    { value: 'b', text: 'Using LSTMs' },
+                    { value: 'c', text: 'Increasing the learning rate' },
+                    { value: 'd', text: 'Reducing the number of layers' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q105',
+                text: 'What is the primary function of the update gate in a GRU?',
+                options: [
+                    { value: 'a', text: 'To control the flow of new information' },
+                    { value: 'b', text: 'To compute the loss' },
+                    { value: 'c', text: 'To initialize weights' },
+                    { value: 'd', text: 'To store the hidden state' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q106',
+                text: 'True/False: RNNs are primarily used for processing sequential data.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q107',
+                text: 'True/False: In a many-to-one RNN architecture, the input is a single value, and the output is a sequence.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q108',
+                text: 'True/False: The vanishing gradient problem occurs when gradients become too large during backpropagation.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q109',
+                text: 'True/False: LSTMs are designed to handle long-term dependencies in sequences.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q110',
+                text: 'True/False: In sentiment classification, the input is a sequence of words, and the output is a single sentiment label.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q111',
+                text: 'True/False: RNNs do not maintain any memory of previous inputs.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q112',
+                text: 'True/False: Backpropagation through time (BPTT) is used to compute gradients in RNNs.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q113',
+                text: 'True/False: GRUs have more parameters than LSTMs.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q114',
+                text: 'True/False: The hidden state in an RNN is passed from one time step to the next.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q115',
+                text: 'True/False: The output of an RNN is always a sequence of values.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q116',
+                text: 'What is the primary purpose of a Convolutional Layer in a CNN?',
+                options: [
+                    { value: 'a', text: 'Reduce the dimensionality of the input' },
+                    { value: 'b', text: 'Extract features from the input image' },
+                    { value: 'c', text: 'Introduce non-linearity' },
+                    { value: 'd', text: 'Combine features for classification' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q117',
+                text: 'Which activation function is commonly used in CNNs to introduce non-linearity?',
+                options: [
+                    { value: 'a', text: 'Sigmoid' },
+                    { value: 'b', text: 'Tanh' },
+                    { value: 'c', text: 'ReLU' },
+                    { value: 'd', text: 'Softmax' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q118',
+                text: 'What does ReLU stand for?',
+                options: [
+                    { value: 'a', text: 'Rectified Linear Unit' },
+                    { value: 'b', text: 'Reduced Linear Unit' },
+                    { value: 'c', text: 'Random Linear Unit' },
+                    { value: 'd', text: 'Rectified Logarithmic Unit' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q119',
+                text: 'Which of the following is NOT a type of pooling?',
+                options: [
+                    { value: 'a', text: 'Max Pooling' },
+                    { value: 'b', text: 'Average Pooling' },
+                    { value: 'c', text: 'Sum Pooling' },
+                    { value: 'd', text: 'Min Pooling' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q120',
+                text: 'What is the purpose of a Pooling Layer in a CNN?',
+                options: [
+                    { value: 'a', text: 'Extract features' },
+                    { value: 'b', text: 'Reduce the number of parameters' },
+                    { value: 'c', text: 'Introduce non-linearity' },
+                    { value: 'd', text: 'Combine features' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q121',
+                text: 'Which layer converts a 2D feature map into a 1D vector?',
+                options: [
+                    { value: 'a', text: 'Convolutional Layer' },
+                    { value: 'b', text: 'Pooling Layer' },
+                    { value: 'c', text: 'Flatten Layer' },
+                    { value: 'd', text: 'Fully Connected Layer' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q122',
+                text: 'What is the output of a Fully Connected Layer in a CNN?',
+                options: [
+                    { value: 'a', text: 'A feature map' },
+                    { value: 'b', text: 'A 1D vector' },
+                    { value: 'c', text: 'A probability distribution' },
+                    { value: 'd', text: 'A reduced image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q123',
+                text: 'Which activation function is used in the final layer of a CNN for multi-class classification?',
+                options: [
+                    { value: 'a', text: 'ReLU' },
+                    { value: 'b', text: 'Sigmoid' },
+                    { value: 'c', text: 'Tanh' },
+                    { value: 'd', text: 'Softmax' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q124',
+                text: 'What is the mathematical operation performed in a Convolutional Layer?',
+                options: [
+                    { value: 'a', text: 'Matrix addition' },
+                    { value: 'b', text: 'Matrix multiplication' },
+                    { value: 'c', text: 'Convolution' },
+                    { value: 'd', text: 'Pooling' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q125',
+                text: 'Which of the following is a common application of CNNs?',
+                options: [
+                    { value: 'a', text: 'Speech recognition' },
+                    { value: 'b', text: 'Image classification' },
+                    { value: 'c', text: 'Text generation' },
+                    { value: 'd', text: 'Time series analysis' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q126',
+                text: 'What is the purpose of the Softmax function?',
+                options: [
+                    { value: 'a', text: 'Introduce non-linearity' },
+                    { value: 'b', text: 'Reduce dimensionality' },
+                    { value: 'c', text: 'Convert logits into probabilities' },
+                    { value: 'd', text: 'Extract features' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q127',
+                text: 'Which layer is responsible for combining features in a CNN?',
+                options: [
+                    { value: 'a', text: 'Convolutional Layer' },
+                    { value: 'b', text: 'Pooling Layer' },
+                    { value: 'c', text: 'Fully Connected Layer' },
+                    { value: 'd', text: 'Flatten Layer' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q128',
+                text: 'What is the output of a ReLU function if the input is -5?',
+                options: [
+                    { value: 'a', text: '-5' },
+                    { value: 'b', text: '0' },
+                    { value: 'c', text: '5' },
+                    { value: 'd', text: '1' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q129',
+                text: 'Which of the following is true about Max Pooling?',
+                options: [
+                    { value: 'a', text: 'It takes the average value in a window' },
+                    { value: 'b', text: 'It takes the maximum value in a window' },
+                    { value: 'c', text: 'It sums all values in a window' },
+                    { value: 'd', text: 'It multiplies all values in a window' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q130',
+                text: 'What is the main advantage of using Pooling Layers in a CNN?',
+                options: [
+                    { value: 'a', text: 'They increase the number of parameters' },
+                    { value: 'b', text: 'They reduce overfitting' },
+                    { value: 'c', text: 'They introduce non-linearity' },
+                    { value: 'd', text: 'They extract features' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q131',
+                text: 'True/False: CNNs are primarily used for text processing tasks.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q132',
+                text: 'True/False: The Convolutional Layer preserves the spatial relationship between pixels in an image.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q133',
+                text: 'True/False: ReLU activation function outputs zero for negative inputs.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q134',
+                text: 'True/False: Pooling layers increase the dimensionality of the feature maps.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q135',
+                text: 'True/False: Max Pooling takes the average value in a window.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q136',
+                text: 'True/False: The Flatten Layer converts a 1D vector into a 2D matrix.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q137',
+                text: 'True/False: Fully Connected Layers have learnable parameters like weights and biases.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q138',
+                text: 'True/False: Softmax activation is used in the middle layers of a CNN.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q139',
+                text: 'True/False: CNNs are not effective for object detection tasks.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q140',
+                text: 'True/False: Global Average Pooling is an alternative to Fully Connected Layers.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q141',
+                text: 'What is the primary goal of image segmentation?',
+                options: [
+                    { value: 'a', text: 'To compress images' },
+                    { value: 'b', text: 'To partition an image into meaningful regions' },
+                    { value: 'c', text: 'To enhance image resolution' },
+                    { value: 'd', text: 'To remove noise from images' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q142',
+                text: 'Which of the following is NOT a type of image segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic segmentation' },
+                    { value: 'b', text: 'Instance segmentation' },
+                    { value: 'c', text: 'Panoptic segmentation' },
+                    { value: 'd', text: 'Edge compression' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q143',
+                text: 'In semantic segmentation, what does "stuff" refer to?',
+                options: [
+                    { value: 'a', text: 'Countable objects' },
+                    { value: 'b', text: 'Uncountable regions like sky or road' },
+                    { value: 'c', text: 'Noise in the image' },
+                    { value: 'd', text: 'Edges in the image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q144',
+                text: 'Which deep learning architecture is specifically designed for biomedical image segmentation?',
+                options: [
+                    { value: 'a', text: 'ResNet' },
+                    { value: 'b', text: 'U-Net' },
+                    { value: 'c', text: 'VGG' },
+                    { value: 'd', text: 'AlexNet' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q145',
+                text: 'What is the key innovation in the U-Net architecture?',
+                options: [
+                    { value: 'a', text: 'Pooling layers' },
+                    { value: 'b', text: 'Skip connections' },
+                    { value: 'c', text: 'Fully connected layers' },
+                    { value: 'd', text: 'Dropout layers' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q146',
+                text: 'Which of the following is a common evaluation metric for segmentation tasks?',
+                options: [
+                    { value: 'a', text: 'Mean Squared Error (MSE)' },
+                    { value: 'b', text: 'DICE coefficient' },
+                    { value: 'c', text: 'F1 Score' },
+                    { value: 'd', text: 'Precision' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q147',
+                text: 'What does the DICE coefficient measure?',
+                options: [
+                    { value: 'a', text: 'The difference between predicted and ground truth masks' },
+                    { value: 'b', text: 'The overlap between predicted and ground truth masks' },
+                    { value: 'c', text: 'The accuracy of object detection' },
+                    { value: 'd', text: 'The resolution of the image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q148',
+                text: 'Which technique is used in instance segmentation to differentiate between objects of the same class?',
+                options: [
+                    { value: 'a', text: 'Semantic labeling' },
+                    { value: 'b', text: 'Bounding boxes' },
+                    { value: 'c', text: 'Pixel-wise masks' },
+                    { value: 'd', text: 'Edge detection' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q149',
+                text: 'What is the main challenge in image segmentation caused by lighting variations?',
+                options: [
+                    { value: 'a', text: 'Over-segmentation' },
+                    { value: 'b', text: 'Under-segmentation' },
+                    { value: 'c', text: 'Ambiguity and noise' },
+                    { value: 'd', text: 'Computational complexity' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q150',
+                text: 'Which of the following is a traditional segmentation technique?',
+                options: [
+                    { value: 'a', text: 'U-Net' },
+                    { value: 'b', text: 'Mask R-CNN' },
+                    { value: 'c', text: 'Region-based segmentation' },
+                    { value: 'd', text: 'DeepLab' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q151',
+                text: 'What is the purpose of thresholding in image segmentation?',
+                options: [
+                    { value: 'a', text: 'To detect edges' },
+                    { value: 'b', text: 'To divide an image into regions based on intensity values' },
+                    { value: 'c', text: 'To remove noise' },
+                    { value: 'd', text: 'To enhance image resolution' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q152',
+                text: 'Which of the following is a clustering-based segmentation algorithm?',
+                options: [
+                    { value: 'a', text: 'Sobel' },
+                    { value: 'b', text: 'K-means' },
+                    { value: 'c', text: 'Canny' },
+                    { value: 'd', text: 'Prewitt' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q153',
+                text: 'What is the primary use of skip connections in U-Net?',
+                options: [
+                    { value: 'a', text: 'To reduce computational complexity' },
+                    { value: 'b', text: 'To preserve spatial information' },
+                    { value: 'c', text: 'To increase image resolution' },
+                    { value: 'd', text: 'To remove noise' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q154',
+                text: 'Which of the following is a common application of image segmentation in medical imaging?',
+                options: [
+                    { value: 'a', text: 'Object tracking' },
+                    { value: 'b', text: 'Tumor detection' },
+                    { value: 'c', text: 'Augmented reality' },
+                    { value: 'd', text: 'Image compression' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q155',
+                text: 'What is the main difference between semantic and instance segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic segmentation detects edges, while instance segmentation detects regions' },
+                    { value: 'b', text: 'Semantic segmentation labels pixels, while instance segmentation differentiates object instances' },
+                    { value: 'c', text: 'Semantic segmentation uses clustering, while instance segmentation uses thresholding' },
+                    { value: 'd', text: 'Semantic segmentation is faster than instance segmentation' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q156',
+                text: 'Which of the following is a common edge detection technique?',
+                options: [
+                    { value: 'a', text: 'K-means' },
+                    { value: 'b', text: 'Sobel' },
+                    { value: 'c', text: 'Region growing' },
+                    { value: 'd', text: 'Thresholding' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q157',
+                text: 'What is the main advantage of adaptive thresholding over global thresholding?',
+                options: [
+                    { value: 'a', text: 'It uses a single threshold for the entire image' },
+                    { value: 'b', text: 'It uses different thresholds for different regions of the image' },
+                    { value: 'c', text: 'It is faster than global thresholding' },
+                    { value: 'd', text: 'It is less accurate than global thresholding' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q158',
+                text: 'Which of the following is a common loss function used in U-Net?',
+                options: [
+                    { value: 'a', text: 'Mean Squared Error (MSE)' },
+                    { value: 'b', text: 'Cross-entropy loss' },
+                    { value: 'c', text: 'Hinge loss' },
+                    { value: 'd', text: 'Logistic loss' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q159',
+                text: 'What is the primary purpose of region growing in segmentation?',
+                options: [
+                    { value: 'a', text: 'To detect edges' },
+                    { value: 'b', text: 'To merge neighboring pixels based on similarity' },
+                    { value: 'c', text: 'To apply global thresholding' },
+                    { value: 'd', text: 'To remove noise' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q160',
+                text: 'Which of the following datasets is commonly used for semantic segmentation tasks?',
+                options: [
+                    { value: 'a', text: 'MNIST' },
+                    { value: 'b', text: 'COCO' },
+                    { value: 'c', text: 'CIFAR-10' },
+                    { value: 'd', text: 'ImageNet' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q161',
+                text: 'True/False: Image segmentation is only used for medical imaging.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q162',
+                text: 'True/False: Semantic segmentation assigns the same label to all instances of the same object class.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q163',
+                text: 'True/False: Instance segmentation provides pixel-wise masks for each object instance.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q164',
+                text: 'True/False: U-Net uses skip connections to preserve spatial information during segmentation.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q165',
+                text: 'True/False: The DICE coefficient ranges from -1 to 1.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q166',
+                text: 'True/False: Thresholding is a deep learning-based segmentation technique.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q167',
+                text: 'True/False: Panoptic segmentation combines semantic and instance segmentation.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q168',
+                text: 'True/False: K-means is a clustering algorithm used for edge detection.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q169',
+                text: 'True/False: Adaptive thresholding uses a single threshold for the entire image.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q170',
+                text: 'True/False: The primary goal of image segmentation is to compress images.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q171',
+                text: 'What is the primary goal of object detection?',
+                options: [
+                    { value: 'a', text: 'Classify objects in an image' },
+                    { value: 'b', text: 'Locate and classify objects in an image' },
+                    { value: 'c', text: 'Segment objects in an image' },
+                    { value: 'd', text: 'Track objects in a video' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q172',
+                text: 'Which of the following is NOT a task in object detection?',
+                options: [
+                    { value: 'a', text: 'Classification' },
+                    { value: 'b', text: 'Localization' },
+                    { value: 'c', text: 'Image segmentation' },
+                    { value: 'd', text: 'Object tracking' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q173',
+                text: 'What does IoU (Intersection over Union) measure?',
+                options: [
+                    { value: 'a', text: 'The overlap between predicted and ground truth bounding boxes' },
+                    { value: 'b', text: 'The speed of object detection' },
+                    { value: 'c', text: 'The accuracy of image classification' },
+                    { value: 'd', text: 'The number of objects detected' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q174',
+                text: 'Which of the following is an example of a two-stage object detector?',
+                options: [
+                    { value: 'a', text: 'YOLO' },
+                    { value: 'b', text: 'SSD' },
+                    { value: 'c', text: 'Faster R-CNN' },
+                    { value: 'd', text: 'RetinaNet' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q175',
+                text: 'What is the main advantage of single-shot detectors like YOLO?',
+                options: [
+                    { value: 'a', text: 'Higher accuracy' },
+                    { value: 'b', text: 'Faster speed' },
+                    { value: 'c', text: 'Better handling of small objects' },
+                    { value: 'd', text: 'More complex architecture' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q176',
+                text: 'In YOLO, what does the grid cell predict?',
+                options: [
+                    { value: 'a', text: 'Only bounding box coordinates' },
+                    { value: 'b', text: 'Only class probabilities' },
+                    { value: 'c', text: 'Bounding box coordinates, confidence score, and class probabilities' },
+                    { value: 'd', text: 'Only confidence score' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q177',
+                text: 'What is the purpose of taking the square root of width and height in YOLO\'s loss function?',
+                options: [
+                    { value: 'a', text: 'To increase the range of values' },
+                    { value: 'b', text: 'To penalize large errors proportionally' },
+                    { value: 'c', text: 'To reduce the complexity of the model' },
+                    { value: 'd', text: 'To improve classification accuracy' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q178',
+                text: 'Which of the following is NOT a type of image segmentation?',
+                options: [
+                    { value: 'a', text: 'Semantic segmentation' },
+                    { value: 'b', text: 'Instance segmentation' },
+                    { value: 'c', text: 'Object localization' },
+                    { value: 'd', text: 'Pixel-level segmentation' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q179',
+                text: 'What does mAP (Mean Average Precision) measure in object detection?',
+                options: [
+                    { value: 'a', text: 'The speed of the model' },
+                    { value: 'b', text: 'The overlap between predicted and ground truth boxes' },
+                    { value: 'c', text: 'The average precision across all classes' },
+                    { value: 'd', text: 'The number of objects detected' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q180',
+                text: 'Which of the following is a key difference between object localization and object detection?',
+                options: [
+                    { value: 'a', text: 'Object localization detects all objects, while object detection detects only one object' },
+                    { value: 'b', text: 'Object localization detects one object, while object detection detects multiple objects' },
+                    { value: 'c', text: 'Object localization uses bounding boxes, while object detection does not' },
+                    { value: 'd', text: 'Object localization is faster than object detection' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q181',
+                text: 'What is the main disadvantage of two-stage detectors compared to single-shot detectors?',
+                options: [
+                    { value: 'a', text: 'Lower accuracy' },
+                    { value: 'b', text: 'Slower speed' },
+                    { value: 'c', text: 'Inability to detect small objects' },
+                    { value: 'd', text: 'Higher complexity' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q182',
+                text: 'Which of the following is a single-shot detector?',
+                options: [
+                    { value: 'a', text: 'Faster R-CNN' },
+                    { value: 'b', text: 'R-CNN' },
+                    { value: 'c', text: 'YOLO' },
+                    { value: 'd', text: 'Mask R-CNN' }
+                ],
+                correct: 'c'
+            },
+            {
+                id: 'q183',
+                text: 'What is the primary purpose of image segmentation?',
+                options: [
+                    { value: 'a', text: 'To classify objects in an image' },
+                    { value: 'b', text: 'To partition an image into meaningful regions' },
+                    { value: 'c', text: 'To track objects in a video' },
+                    { value: 'd', text: 'To detect objects in an image' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q184',
+                text: 'Which of the following is NOT a parameter of a bounding box?',
+                options: [
+                    { value: 'a', text: 'Center coordinates (x, y)' },
+                    { value: 'b', text: 'Width (w)' },
+                    { value: 'c', text: 'Height (h)' },
+                    { value: 'd', text: 'Confidence score' }
+                ],
+                correct: 'd'
+            },
+            {
+                id: 'q185',
+                text: 'What is the range of IoU (Intersection over Union)?',
+                options: [
+                    { value: 'a', text: '0 to 100' },
+                    { value: 'b', text: '0 to 1' },
+                    { value: 'c', text: '-1 to 1' },
+                    { value: 'd', text: '0 to 10' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q186',
+                text: 'Which of the following is a key advantage of YOLO over traditional sliding window approaches?',
+                options: [
+                    { value: 'a', text: 'Higher accuracy' },
+                    { value: 'b', text: 'Faster speed' },
+                    { value: 'c', text: 'Better handling of small objects' },
+                    { value: 'd', text: 'More complex architecture' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q187',
+                text: 'What does the term "single-shot" in YOLO refer to?',
+                options: [
+                    { value: 'a', text: 'Detecting objects in a single pass through the network' },
+                    { value: 'b', text: 'Detecting only one object per image' },
+                    { value: 'c', text: 'Using a single bounding box for all objects' },
+                    { value: 'd', text: 'Detecting objects in a single frame of a video' }
+                ],
+                correct: 'a'
+            },
+            {
+                id: 'q188',
+                text: 'Which of the following is a common application of object detection?',
+                options: [
+                    { value: 'a', text: 'Image classification' },
+                    { value: 'b', text: 'Autonomous driving' },
+                    { value: 'c', text: 'Image compression' },
+                    { value: 'd', text: 'Video editing' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q189',
+                text: 'What is the main purpose of the confidence score in YOLO?',
+                options: [
+                    { value: 'a', text: 'To indicate the class of the object' },
+                    { value: 'b', text: 'To indicate the probability that the bounding box contains an object' },
+                    { value: 'c', text: 'To indicate the size of the bounding box' },
+                    { value: 'd', text: 'To indicate the position of the bounding box' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q190',
+                text: 'Which of the following is a key feature of YOLOv3 compared to earlier versions?',
+                options: [
+                    { value: 'a', text: 'Slower speed' },
+                    { value: 'b', text: 'Better handling of small objects' },
+                    { value: 'c', text: 'Lower accuracy' },
+                    { value: 'd', text: 'Simpler architecture' }
+                ],
+                correct: 'b'
+            },
+            {
+                id: 'q191',
+                text: 'True/False: Object detection involves both classification and localization.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q192',
+                text: 'True/False: YOLO is an example of a two-stage object detector.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q193',
+                text: 'True/False: Image segmentation is used to locate objects and boundaries within images.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q194',
+                text: 'True/False: IoU (Intersection over Union) measures the speed of object detection.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q195',
+                text: 'True/False: Single-shot detectors are generally faster but less accurate than two-stage detectors.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q196',
+                text: 'True/False: YOLO predicts bounding boxes and class probabilities in a single pass through the network.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+                id: 'q197',
+                text: 'True/False: The square root transformation is applied to the x and y coordinates in YOLO\'s loss function.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q198',
+                text: 'True/False: Faster R-CNN is an example of a single-shot detector.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q199',
+                text: 'True/False: mAP (Mean Average Precision) is a metric used to evaluate the speed of object detection models.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'false'
+            },
+            {
+                id: 'q200',
+                text: 'True/False: YOLO divides the image into a grid and predicts bounding boxes for each grid cell.',
+                options: [
+                    { value: 'true', text: 'True' },
+                    { value: 'false', text: 'False' }
+                ],
+                correct: 'true'
+            },
+            {
+        id: 'q201',
+        text: 'What is the primary innovation of the Transformer architecture?',
+        options: [
+            { value: 'a', text: 'Convolutional layers' },
+            { value: 'b', text: 'Recurrent connections' },
+            { value: 'c', text: 'Attention mechanism' },
+            { value: 'd', text: 'Dropout layers' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q202',
+        text: 'Which problem do RNNs and LSTMs face when processing long sequences?',
+        options: [
+            { value: 'a', text: 'Overfitting' },
+            { value: 'b', text: 'Vanishing and exploding gradients' },
+            { value: 'c', text: 'High computational cost' },
+            { value: 'd', text: 'Lack of non-linearity' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q203',
+        text: 'What is the main advantage of Transformers over RNNs?',
+        options: [
+            { value: 'a', text: 'Sequential processing' },
+            { value: 'b', text: 'Parallelism' },
+            { value: 'c', text: 'Smaller model size' },
+            { value: 'd', text: 'Simpler architecture' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q204',
+        text: 'Which component of the Transformer is responsible for generating output sequences?',
+        options: [
+            { value: 'a', text: 'Encoder' },
+            { value: 'b', text: 'Decoder' },
+            { value: 'c', text: 'Embedding layer' },
+            { value: 'd', text: 'Feedforward network' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q205',
+        text: 'What is the purpose of positional encoding in Transformers?',
+        options: [
+            { value: 'a', text: 'To add semantic meaning to tokens' },
+            { value: 'b', text: 'To provide information about the position of tokens' },
+            { value: 'c', text: 'To reduce model size' },
+            { value: 'd', text: 'To introduce non-linearity' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q206',
+        text: 'Which pre-trained Transformer model is known for its bidirectional context understanding?',
+        options: [
+            { value: 'a', text: 'GPT' },
+            { value: 'b', text: 'BERT' },
+            { value: 'c', text: 'T5' },
+            { value: 'd', text: 'Transformer-XL' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q207',
+        text: 'What is the role of the Feedforward Neural Network (FFN) in Transformers?',
+        options: [
+            { value: 'a', text: 'To calculate attention scores' },
+            { value: 'b', text: 'To introduce non-linearity' },
+            { value: 'c', text: 'To generate output sequences' },
+            { value: 'd', text: 'To tokenize input data' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q208',
+        text: 'Which task is an example of an encoder-only architecture?',
+        options: [
+            { value: 'a', text: 'Machine translation' },
+            { value: 'b', text: 'Text generation' },
+            { value: 'c', text: 'Sentiment analysis' },
+            { value: 'd', text: 'Question answering' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q209',
+        text: 'What is the purpose of the softmax function in the Transformer\'s output layer?',
+        options: [
+            { value: 'a', text: 'To normalize attention scores' },
+            { value: 'b', text: 'To generate a probability distribution over the vocabulary' },
+            { value: 'c', text: 'To calculate positional encoding' },
+            { value: 'd', text: 'To tokenize input sequences' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q210',
+        text: 'What does the "masked" in masked self-attention refer to?',
+        options: [
+            { value: 'a', text: 'Masking future tokens during training' },
+            { value: 'b', text: 'Masking irrelevant tokens' },
+            { value: 'c', text: 'Masking positional encoding' },
+            { value: 'd', text: 'Masking attention scores' }
+        ],
+        correct: 'a'
+    },
+    {
+        id: 'q211',
+        text: 'Which formula is used for positional encoding in Transformers?',
+        options: [
+            { value: 'a', text: 'Linear functions' },
+            { value: 'b', text: 'Exponential functions' },
+            { value: 'c', text: 'Sine and cosine functions' },
+            { value: 'd', text: 'Polynomial functions' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q212',
+        text: 'What is the purpose of the Add & Norm layers in Transformers?',
+        options: [
+            { value: 'a', text: 'To calculate attention scores' },
+            { value: 'b', text: 'To stabilize the network and normalize outputs' },
+            { value: 'c', text: 'To generate output sequences' },
+            { value: 'd', text: 'To tokenize input data' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q213',
+        text: 'Which Transformer architecture is used for text generation tasks?',
+        options: [
+            { value: 'a', text: 'Encoder-only' },
+            { value: 'b', text: 'Decoder-only' },
+            { value: 'c', text: 'Encoder-decoder' },
+            { value: 'd', text: 'Feedforward-only' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q214',
+        text: 'What is the role of the Query (Q) matrix in the attention mechanism?',
+        options: [
+            { value: 'a', text: 'To provide information about the positions in the input sequence' },
+            { value: 'b', text: 'To generate queries or questions about the input sequence' },
+            { value: 'c', text: 'To store semantic information about tokens' },
+            { value: 'd', text: 'To calculate positional encoding' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q215',
+        text: 'Which of the following is NOT a task suited for the encoder-decoder architecture?',
+        options: [
+            { value: 'a', text: 'Machine translation' },
+            { value: 'b', text: 'Text summarization' },
+            { value: 'c', text: 'Sentiment analysis' },
+            { value: 'd', text: 'Question answering' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q216',
+        text: 'What is the purpose of the scaling factor in scaled dot-product attention?',
+        options: [
+            { value: 'a', text: 'To increase the dot product values' },
+            { value: 'b', text: 'To stabilize gradients during training' },
+            { value: 'c', text: 'To reduce the dimensionality of the vectors' },
+            { value: 'd', text: 'To introduce non-linearity' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q217',
+        text: 'Which of the following is a key advantage of using multiple attention heads?',
+        options: [
+            { value: 'a', text: 'Reduced model size' },
+            { value: 'b', text: 'Increased parallelism' },
+            { value: 'c', text: 'Specialization in capturing different patterns' },
+            { value: 'd', text: 'Faster tokenization' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q218',
+        text: 'What is the purpose of the <BOS> token in tokenization?',
+        options: [
+            { value: 'a', text: 'To indicate the end of the sequence' },
+            { value: 'b', text: 'To indicate the beginning of the sequence' },
+            { value: 'c', text: 'To mask future tokens' },
+            { value: 'd', text: 'To calculate attention scores' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q219',
+        text: 'Which layer is responsible for transforming decoder output into a probability distribution?',
+        options: [
+            { value: 'a', text: 'Linear layer' },
+            { value: 'b', text: 'Softmax layer' },
+            { value: 'c', text: 'Feedforward layer' },
+            { value: 'd', text: 'Attention layer' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q220',
+        text: 'What is the primary role of the encoder in the Transformer architecture?',
+        options: [
+            { value: 'a', text: 'To generate output sequences' },
+            { value: 'b', text: 'To process input sequences and create meaningful representations' },
+            { value: 'c', text: 'To tokenize input data' },
+            { value: 'd', text: 'To calculate positional encoding' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q221',
+        text: 'Which of the following is a key advantage of Transformers over RNNs?',
+        options: [
+            { value: 'a', text: 'They are smaller in size' },
+            { value: 'b', text: 'They can process sequences in parallel' },
+            { value: 'c', text: 'They do not require positional encoding' },
+            { value: 'd', text: 'They are easier to implement' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q222',
+        text: 'What is the role of the Key (K) matrix in the attention mechanism?',
+        options: [
+            { value: 'a', text: 'To generate queries about the input sequence' },
+            { value: 'b', text: 'To provide information about the positions in the input sequence' },
+            { value: 'c', text: 'To store semantic information about tokens' },
+            { value: 'd', text: 'To calculate positional encoding' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q223',
+        text: 'Which of the following is a task suited for the decoder-only architecture?',
+        options: [
+            { value: 'a', text: 'Sentiment analysis' },
+            { value: 'b', text: 'Text generation' },
+            { value: 'c', text: 'Named entity recognition' },
+            { value: 'd', text: 'Machine translation' }
+        ],
+        correct: 'b'
+    },
+    {
+        id: 'q224',
+        text: 'What is the purpose of the Value (V) matrix in the attention mechanism?',
+        options: [
+            { value: 'a', text: 'To generate queries about the input sequence' },
+            { value: 'b', text: 'To provide information about the positions in the input sequence' },
+            { value: 'c', text: 'To store semantic information about tokens' },
+            { value: 'd', text: 'To calculate positional encoding' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q225',
+        text: 'Which of the following is a key feature of the Transformer architecture?',
+        options: [
+            { value: 'a', text: 'Sequential processing' },
+            { value: 'b', text: 'Convolutional layers' },
+            { value: 'c', text: 'Self-attention mechanism' },
+            { value: 'd', text: 'Recurrent connections' }
+        ],
+        correct: 'c'
+    },
+    {
+        id: 'q226',
+        text: 'True/False: Transformers process input sequences sequentially, similar to RNNs.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q227',
+        text: 'True/False: The self-attention mechanism allows Transformers to capture long-range dependencies in sequences.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    },
+    {
+        id: 'q228',
+        text: 'True/False: Positional encoding is necessary because Transformers process all tokens in parallel.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    },
+    {
+        id: 'q229',
+        text: 'True/False: BERT is an example of a decoder-only Transformer model.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q230',
+        text: 'True/False: The Feedforward Neural Network (FFN) in Transformers is used to calculate attention scores.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q231',
+        text: 'True/False: Masked self-attention is used in the encoder to prevent attending to future tokens.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q232',
+        text: 'True/False: The softmax function is used to normalize attention scores into a probability distribution.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    },
+    {
+        id: 'q233',
+        text: 'True/False: Transformers are less scalable than RNNs due to their sequential nature.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q234',
+        text: 'True/False: The encoder-decoder architecture is commonly used for machine translation tasks.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    },
+    {
+        id: 'q235',
+        text: 'True/False: Multi-head attention allows the model to focus on different parts of the input sequence simultaneously.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    },
+    {
+        id: 'q236',
+        text: 'True/False: Transformers do not require tokenization as they can process raw text directly.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q237',
+        text: 'True/False: The decoder in Transformers uses bidirectional attention to attend to both past and future tokens.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q238',
+        text: 'True/False: The attention mechanism in Transformers is inspired by human visual attention.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    },
+    {
+        id: 'q239',
+        text: 'True/False: Transformers are primarily used for image processing tasks.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'false'
+    },
+    {
+        id: 'q240',
+        text: 'True/False: The output of the Transformer\'s decoder is a probability distribution over the target vocabulary.',
+        options: [
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' }
+        ],
+        correct: 'true'
+    }
+        ];
+
+        let currentScore = 0;
+        const scoreDisplay = document.getElementById('score');
+        
+        function createQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            questions.forEach((question, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                
+                questionCard.innerHTML = `
+                    <p class="question-text">${index + 1}. ${question.text}</p>
+                    <div class="options-container">
+                        ${question.options.map(option => `
+                            <label class="option-label">
+                                <input type="radio" name="${question.id}" value="${option.value}" 
+                                       onchange="checkAnswer('${question.id}', '${option.value}', '${question.correct}')">
+                                ${option.text}
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div class="feedback" id="feedback-${question.id}"></div>
+                `;
+                
+                container.appendChild(questionCard);
+            });
+        }
+
+        function checkAnswer(questionId, selected, correct) {
+            const feedbackElement = document.getElementById(`feedback-${questionId}`);
+            const previousFeedback = feedbackElement.className.includes('correct');
+            const isCorrect = selected === correct;
+            
+            if (isCorrect) {
+                feedbackElement.textContent = 'Correct!';
+                feedbackElement.className = 'feedback correct';
+                if (!previousFeedback) currentScore++;
+            } else {
+                feedbackElement.textContent = 'Incorrect!';
+                feedbackElement.className = 'feedback incorrect';
+                if (previousFeedback) currentScore--;
+            }
+            
+            scoreDisplay.textContent = currentScore;
+        }
+
+        function calculateFinalScore() {
+            const resultContainer = document.getElementById('result');
+            const finalScoreElement = document.getElementById('finalScore');
+            const percentageElement = document.getElementById('percentage');
+            
+            const percentage = ((currentScore / questions.length) * 100).toFixed(2);
+            
+            finalScoreElement.textContent = `You scored ${currentScore} out of ${questions.length}`;
+            percentageElement.textContent = `Percentage: ${percentage}%`;
+            
+            resultContainer.className = 'result-container show';
+        }
+
+        // Initialize the quiz when the page loads
+        window.onload = createQuiz;
+    </script>
+</body>
+</html>
